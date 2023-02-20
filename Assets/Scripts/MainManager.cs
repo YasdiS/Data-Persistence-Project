@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -12,20 +13,23 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public GameObject HighScore;
+    public TMP_InputField inputField;
+
     private bool m_Started = false;
-    private int m_Points;
-    
+    public int m_Points;
+
     private bool m_GameOver = false;
 
-    
+    public string m_Name;
+
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,6 +40,9 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        SaveManager.Instance.HighdcoreText1.SetActive(true);
+        SaveManager.Instance.HighdcoreText2.SetActive(false);
     }
 
     private void Update()
@@ -55,9 +62,20 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (m_Points > LoadPoints())
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                if (Input.GetKeyDown(KeyCode.Return))
+                {
+                    SavePoints();
+                    SceneManager.LoadScene(0);
+                }
+            }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
             }
         }
     }
@@ -71,6 +89,39 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
-        GameOverText.SetActive(true);
+
+        if (m_Points > LoadPoints())
+        {
+            HighScore.SetActive(true);
+        }
+        else
+        {
+            GameOverText.SetActive(true);
+        }
+    }
+
+    public void SavePoints()
+    {
+        if (m_Points > LoadPoints())
+        {
+            m_Name = inputField.text;
+
+            SaveManager.Instance.m_Points = m_Points;
+            SaveManager.Instance.m_Name = m_Name;
+            SaveManager.Instance.SaveScore();
+        }
+    }
+
+    public int LoadPoints()
+    {
+        SaveManager.Instance.LoadScore();
+        int LoadPoints = SaveManager.Instance.m_Points;
+
+        return LoadPoints;
+    }
+
+    public void ResetPoints()
+    {
+        SaveManager.Instance.ResetScore();
     }
 }
