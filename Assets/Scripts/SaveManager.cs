@@ -24,6 +24,8 @@ public class SaveManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        LoadScore();
     }
 
     private void Update()
